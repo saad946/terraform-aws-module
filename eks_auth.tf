@@ -183,9 +183,10 @@ resource "kubernetes_cluster_role" "cluster_viewer_built_in_ungrouped" {
     resources = [
       "nodes",
       "persistentvolumes",
-*/
+
       "podtemplates",
     ]
     verbs = ["get", "list", "watch"]
   }
 }
+*/
