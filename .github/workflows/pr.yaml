@@ -1,0 +1,76 @@
+name: PR
+on:
+  pull_request:
+
+env:
+  AWS_REGION: ap-southeast-1
+  
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Format
+        run: terraform fmt -recursive -check
+        
+     # - name: Configure AWS credentials
+      #  uses: aws-actions/configure-aws-credentials@v3
+       # with:
+        #  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          #aws-region: ${{ env.AWS_REGION }}
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+
+      - name: Terraform init
+        run: terraform init
+        
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Cache TFLint plugins
+        uses: actions/cache@v2
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('.tflint.hcl') }}
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v1
+        with:
+          tflint_version: v0.32.1
+
+      - name: Init TFLint
+        run: tflint --init
+
+      - name: Run TFLint
+        run: tflint
+
+      - name: tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Locking checkov version down to be more in control of 
+      # when we'd like to update these checks
+      # https://github.com/bridgecrewio/checkov-action/commit/a06d45af1edcb93085686c712634018534832f6f
+      # bridgecrew/checkov:2.0.736
+
+      #- name: Checkov
+      #  uses: bridgecrewio/checkov-action@v12.1171.0
+      #  with:
+      #    framework: terraform
+      #    quiet: true
+
