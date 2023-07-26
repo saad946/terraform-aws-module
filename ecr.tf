@@ -1,3 +1,4 @@
+
 resource "aws_ecr_repository" "this" {
   #checkov:skip=CKV_AWS_136: "Ensure that ECR repositories are encrypted using KMS" https://docs.bridgecrew.io/docs/ensure-that-ecr-repositories-are-encrypted
   for_each             = toset(var.ecr_repository)
@@ -62,13 +63,19 @@ data "aws_iam_policy_document" "pullpush_policy" {
   }
 }
 
+/*
+
 resource "aws_ecr_repository_policy" "pullpush" {
   for_each   = toset(var.ecr_repository)
   repository = aws_ecr_repository.this[each.key].name
   policy     = data.aws_iam_policy_document.pullpush_policy.json
 }
+*/
 data "aws_caller_identity" "current" {}
+
+
 data "aws_partition" "this" {}
+
 
 data "aws_iam_policy_document" "pullthroughcache_policy" {
   dynamic "statement" {
@@ -143,17 +150,21 @@ resource "aws_ecr_lifecycle_policy" "this" {
 EOF
 }
 
+
 resource "aws_ecr_registry_policy" "this" {
   policy = data.aws_iam_policy_document.pullthroughcache_policy.json
 }
 
+/*
 resource "aws_ecr_pull_through_cache_rule" "ecr-public" {
   ecr_repository_prefix = "ecr-public"
   upstream_registry_url = "public.ecr.aws"
 }
-
+*/
+/*
 resource "aws_ecr_repository_policy" "pullthroughcache_ecr_sharing" {
   for_each   = toset(var.pullthroughcache_repositories)
   repository = "ecr-public/${each.key}"
   policy     = data.aws_iam_policy_document.pullthroughcache_ecr_sharing.json
 }
+*/
