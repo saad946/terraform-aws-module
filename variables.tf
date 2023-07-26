@@ -126,12 +126,6 @@ variable "auto_minor_version_upgrade" {
   type        = bool
 }
 
-variable "master_username" {
-  description = "The master username for the database"
-  type        = string
-  default     = "postgres"
-}
-
 variable "account_id" {
   description = "The master username for the database"
   type        = string
