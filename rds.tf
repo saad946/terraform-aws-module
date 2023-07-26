@@ -13,7 +13,7 @@ locals {
 # terraform aws db subnet group
 resource "aws_db_subnet_group" "this" {
   name        = "database subnets"
-  subnet_ids  = [aws_subnet.private_ap_southeast_1a.id, aws_subnet.private_ap_southeast_1b.id]
+  subnet_ids  = [aws_subnet.private_1.id, aws_subnet.private_2.id]
   description = "Subnets for Database Instance"
 
   tags = {
@@ -25,15 +25,20 @@ resource "aws_db_subnet_group" "this" {
 # Create Database Instance Restored from DB Snapshots
 # terraform aws db instance
 resource "aws_db_instance" "database-instance" {
-  instance_class         = var.instance_class
-  skip_final_snapshot    = true
-  availability_zone      = "ap-southeast-1a"
+
+  skip_final_snapshot = true
+  engine              = "mysql"
+  engine_version      = "5.7"
+  instance_class      = var.instance_class
+  allocated_storage   = 10
+  //iops                = 100
+
   db_subnet_group_name   = aws_db_subnet_group.this.name
   multi_az               = var.multi-az-deployment
   vpc_security_group_ids = [aws_security_group.that.id]
-  publicly_accessible    = true
-  username               = local.db_creds.username
-  password               = local.db_creds.password
+  publicly_accessible    = false
+  username               = var.username
+  password               = var.password
 }
 
 
@@ -109,7 +114,7 @@ resource "aws_rds_cluster" "this" {
   #checkov:skip=CKV2_AWS_27: Query Logging is not required
   #checkov:skip=CKV2_AWS_8: Backup is not required
   cluster_identifier                  = local.cluster_identifier
-  database_name                       = "postgres"
+  database_name                       = "mysql"
   port                                = var.port
   backup_retention_period             = var.backup_retention_period
   skip_final_snapshot                 = true
@@ -118,8 +123,10 @@ resource "aws_rds_cluster" "this" {
   vpc_security_group_ids              = [aws_security_group.that.id]
   preferred_maintenance_window        = var.preferred_maintenance_window
   db_subnet_group_name                = aws_db_subnet_group.this.name
+  master_username                     = var.master_username
+  master_password                     = var.master_password
   iam_database_authentication_enabled = true
-  engine                              = "aurora-postgresql"
+  engine                              = "mysql"
   engine_version                      = var.engine_version
   engine_mode                         = "provisioned"
   deletion_protection                 = true
@@ -177,24 +184,6 @@ resource "aws_ssm_parameter" "reader" {
   value       = aws_rds_cluster.this.reader_endpoint
 }
 
-/*
-resource "aws_rds_cluster_parameter_group" "this" {
-  name        = "custom-aurora-postgresql-${local.major_version}-${local.minor_version}-${var.name}"
-  family      = "aurora-postgresql${local.major_version}"
-  description = "Aurora PostgreSQL cluster parameter group"
 
-  dynamic "parameter" {
-    for_each = var.cluster_parameters
-    content {
-      apply_method = lookup(parameter.value, "apply_method", null)
-      name         = parameter.value.name
-      value        = parameter.value.value
-    }
-  }
 
-  lifecycle {
-    create_before_destroy = true
-  }
-}
 
-*/
