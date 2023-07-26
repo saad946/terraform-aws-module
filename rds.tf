@@ -13,7 +13,7 @@ locals {
 # terraform aws db subnet group
 resource "aws_db_subnet_group" "this" {
   name        = "database subnets"
-  subnet_ids  = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+  subnet_ids  = [aws_subnet.private_ap_southeast_1a.id, aws_subnet.private_ap_southeast_1b.id]
   description = "Subnets for Database Instance"
 
   tags = {
