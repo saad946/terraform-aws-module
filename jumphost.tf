@@ -32,13 +32,6 @@ resource "aws_launch_configuration" "bastion_lc" {
     volume_type           = "gp2"
     delete_on_termination = true
   }
-
-  user_data = base64encode(templatefile("${path.module}/jumphost_user_data.sh.tpl", {
-    kubectl_version = "1.23.0",
-    cluster_name    = "${var.env}-${var.cluster_name}",
-    jumphost_role   = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/system-apps-jumphost-asg-role"
-  }))
-
 }
 
 # Create an auto scaling group for the bastion hosts
