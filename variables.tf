@@ -77,6 +77,26 @@ variable "instance_class" {
   type        = string
 }
 
+variable "password" {
+  type        = string
+  description = "RDS password"
+}
+variable "username" {
+  type        = string
+  description = "RDS username"
+}
+
+
+variable "master_password" {
+  type        = string
+  description = "RDS master_name"
+}
+
+variable "master_username" {
+  type        = string
+  description = "RDS rmaster_password"
+}
+
 variable "backup_plan_schedule" {
   type        = string
   description = "A CRON expression specifying when AWS Backup initiates a backup job"
