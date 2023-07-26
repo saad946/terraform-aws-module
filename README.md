@@ -1,2 +1,2 @@
-# terrafrom-preprod-vpc-apps
+# terrafrom-aws-module
 Testing PreProd VPC via terraform.
